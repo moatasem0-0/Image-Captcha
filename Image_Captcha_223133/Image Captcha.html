@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image CAPTCHA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .captcha-container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        #image-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .captcha-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .captcha-image.selected {
+            border-color: green;
+        }
+
+        #verify-button,
+        #try-again-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: blue;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        #try-again-button {
+            background-color: red;
+        }
+
+        #captcha-result {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        #captcha-result.success {
+            color: green;
+        }
+
+        #captcha-result.failure {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="captcha-container">
+        <h1>I Am Not a Robot</h1>
+        <p>Select all images with a Bus</p>
+        <div id="image-grid">
+        </div>
+        <button id="verify-button">Verify</button>
+        <button id="try-again-button" style="display: none;">Try Again</button>
+        <div id="captcha-result"></div>
+    </div>
+    <script>
+        const imageGrid = document.getElementById("image-grid");
+        const verifyButton = document.getElementById("verify-button");
+        const tryAgainButton = document.getElementById("try-again-button");
+        const captchaResult = document.getElementById("captcha-result");
+        const images = [
+            { url: "images/bus1.jpg", isTarget: true },
+            { url: "images/bus2.jpg", isTarget: true },
+            { url: "images/bus3.jpg", isTarget: true },
+            { url: "images/trafficlight1.jpg", isTarget: false },
+            { url: "images/trafficlight2.jpg", isTarget: false },
+            { url: "images/trafficlight3.jpg", isTarget: false },
+            { url: "images/car1.jpg", isTarget: false },
+            { url: "images/car2.jpg", isTarget: false },
+            { url: "images/car3.jpg", isTarget: false },
+        ];
+
+        const shuffledImages = images.sort(() => Math.random() - 0.5);
+
+        shuffledImages.forEach((image, index) => {
+            const img = document.createElement("img");
+            img.src = image.url;
+            img.alt = `Image ${index + 1}`;
+            img.classList.add("captcha-image");
+            img.dataset.isTarget = image.isTarget;
+            img.addEventListener("click", () => {
+                img.classList.toggle("selected");
+            });
+            imageGrid.appendChild(img);
+        });
+
+        verifyButton.addEventListener("click", () => {
+            const selectedImages = document.querySelectorAll(".captcha-image.selected");
+            const isCorrect = Array.from(selectedImages).every(
+                (img) => img.dataset.isTarget === "true"
+            ) && selectedImages.length === images.filter(img => img.isTarget).length;
+
+            if (isCorrect) {
+                captchaResult.textContent = "✔️ Verify Complete!";
+                captchaResult.className = "success";
+                tryAgainButton.style.display = "none";
+            } else {
+                captchaResult.textContent = "❌ Incorrect. Please try again.";
+                captchaResult.className = "failure";
+                tryAgainButton.style.display = "inline-block";
+            }
+        });
+
+        tryAgainButton.addEventListener("click", () => {
+            location.reload();
+        });
+    </script>
+</body>
+
+</html>
